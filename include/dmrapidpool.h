@@ -30,21 +30,97 @@
 #include <cassert>
 #include <new>
 
+#include <set>
+#include <string>
+#include <map>
+
+#include "dmsingleton.h"
+#include "dmlist.h"
+
+class IDMRapidInfo
+{
+public:
+    virtual ~IDMRapidInfo() {}
+    virtual uint64_t GetFreeCount(void) = 0;
+    virtual uint64_t GetAllCount(void) = 0;
+    virtual uint64_t GetMallocCount(void) = 0;
+    virtual const char* GetObjName(void) = 0;
+    virtual uint64_t GetObjSize(void) = 0;
+};
+
+class CDMRapidManager : 
+    public CDMSafeSingleton<CDMRapidManager>
+{
+    friend class CDMSafeSingleton<CDMRapidManager>;
+
+    typedef std::set<IDMRapidInfo*>   SetDMRapidInfo;
+    typedef SetDMRapidInfo::iterator  SetDMRapidInfoIt;
+
+    typedef std::map<std::string, SetDMRapidInfo> MapDMRapidInfo;
+    typedef MapDMRapidInfo::iterator              MapDMRapidInfoIt;
+public:
+
+    void RegPool(IDMRapidInfo* poInfo)
+    {
+        MapDMRapidInfoIt mapIt = m_mapDMRapidInfo.find(poInfo->GetObjName());
+        if (mapIt != m_mapDMRapidInfo.end())
+        {
+            SetDMRapidInfo& set = mapIt->second;
+
+            SetDMRapidInfoIt setIt = set.find(poInfo);
+            if (setIt != set.end())
+            {
+                assert(0);
+                return;
+            }
+        }
+
+        m_mapDMRapidInfo[poInfo->GetObjName()].insert(poInfo);
+    }
+
+    void UnRegPool(IDMRapidInfo* poInfo)
+    {
+        MapDMRapidInfoIt mapIt = m_mapDMRapidInfo.find(poInfo->GetObjName());
+        if (mapIt == m_mapDMRapidInfo.end())
+        {
+            assert(0);
+            return;
+        }
+
+        SetDMRapidInfo& set = mapIt->second;
+
+        SetDMRapidInfoIt setIt = set.find(poInfo);
+        if (setIt == set.end())
+        {
+            assert(0);
+            return;
+        }
+ 
+        set.erase(setIt);
+        if (set.empty())
+        {
+            m_mapDMRapidInfo.erase(mapIt);
+        }
+    }
+private:
+    MapDMRapidInfo m_mapDMRapidInfo;
+};
+
 template<class T, int S>
 class CDMRapidPool {
   public:
     typedef T OBJTYPE;
 
     typedef struct tagRapidData {
-        unsigned int dwUse: 1;
-        unsigned int dwIndex: 15;
-        unsigned int dwFlag: 16;
+        uint32_t dwUse: 1;
+        uint32_t dwIndex: 15;
+        uint32_t dwFlag: 16;
         char szData[sizeof( OBJTYPE )];
     } SRapidData;
 
     static const int SIZE = S;
 
-    CDMRapidPool( unsigned short wIndex = 0 )
+    CDMRapidPool( uint16_t wIndex = 0 )
         : m_wIndex( wIndex ), m_wFirstFlag( 0 ), m_nFreeCount( 0 ) {
         for ( int i = 0; i < SIZE; ++i ) {
             m_stRapidData[i].dwUse = 0;
@@ -59,6 +135,7 @@ class CDMRapidPool {
         assert( IsFull() );
     }
 
+public:
     template<typename... Args>
     inline OBJTYPE*  FetchObj(Args&&... args) {
         if ( m_nFreeCount <= 0 ) {
@@ -113,14 +190,17 @@ class CDMRapidPool {
     }
 
   private:
-    unsigned short m_wIndex;
-    unsigned short m_wFirstFlag;
+    uint16_t m_wIndex;
+    uint16_t m_wFirstFlag;
     int m_nFreeCount;
     SRapidData m_stRapidData[SIZE];
 };
 
-template<class T, int S, int I>
-class CDynamicRapidPool {
+
+template<class T, int S = 1000, int I = 1000>
+class CDynamicRapidPool
+    : public IDMRapidInfo
+{
   public:
     typedef CDynamicRapidPool<T, S, I>  CThisPool;
     typedef CDMRapidPool<T, S>            CBaseRapidPool;
@@ -134,14 +214,39 @@ class CDynamicRapidPool {
     CDynamicRapidPool()
         : m_oDefaultRapidPool( 0 ) {
         memset( m_arrGrowRapidPool, 0, sizeof( m_arrGrowRapidPool ) );
+
+        CDMRapidManager::Instance()->RegPool(this);
     }
 
     ~CDynamicRapidPool() {
         for ( int i = 0; i < INDEX; ++i ) {
             delete m_arrGrowRapidPool[i];
         }
-    }
 
+        CDMRapidManager::Instance()->UnRegPool(this);
+    }
+public:
+    virtual uint64_t GetFreeCount(void)
+    {
+        return 0;
+    }
+    virtual uint64_t GetAllCount(void)
+    {
+        return 0;
+    }
+    virtual uint64_t GetMallocCount(void)
+    {
+        return 0;
+    }
+    virtual const char* GetObjName(void)
+    {
+        return typeid(OBJTYPE).name();
+    }
+    virtual uint64_t GetObjSize(void)
+    {
+        return sizeof(OBJTYPE);
+    }
+public:
     template<typename... Args>
     inline OBJTYPE*  FetchObj(Args&&... args) {
         if ( !m_oDefaultRapidPool.Empty() ) {
@@ -181,7 +286,7 @@ class CDynamicRapidPool {
         assert( m_arrGrowRapidPool[p->dwIndex - 1] );
         m_arrGrowRapidPool[p->dwIndex - 1]->ReleaseObj( obj );
     }
-  private:
+private:
 
     CBaseRapidPool  m_oDefaultRapidPool;
     CBaseRapidPool* m_arrGrowRapidPool[INDEX];
