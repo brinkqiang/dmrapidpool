@@ -59,7 +59,8 @@ class CDMRapidPool {
         assert( IsFull() );
     }
 
-    inline OBJTYPE*  FetchObj() {
+    template<typename... Args>
+    inline OBJTYPE*  FetchObj(Args&&... args) {
         if ( m_nFreeCount <= 0 ) {
             return NULL;
         }
@@ -77,7 +78,7 @@ class CDMRapidPool {
         --m_nFreeCount;
         p->dwUse = 1;
         assert( m_nFreeCount >= 0 && m_nFreeCount <= SIZE );
-        return new ( p->szData ) T();
+        return new ( p->szData ) T(std::forward<Args>(args)...);
     }
 
     inline void ReleaseObj( OBJTYPE* tObj ) {
@@ -141,9 +142,10 @@ class CDynamicRapidPool {
         }
     }
 
-    inline OBJTYPE*  FetchObj() {
+    template<typename... Args>
+    inline OBJTYPE*  FetchObj(Args&&... args) {
         if ( !m_oDefaultRapidPool.Empty() ) {
-            return m_oDefaultRapidPool.FetchObj();
+            return m_oDefaultRapidPool.FetchObj(std::forward<Args>(args)...);
         }
 
         for ( int i = 0; i < INDEX; ++i ) {
@@ -151,11 +153,11 @@ class CDynamicRapidPool {
                 m_arrGrowRapidPool[i] = new CBaseRapidPool( i + 1 );
 
                 if ( !m_arrGrowRapidPool[i]->Empty() ) {
-                    return m_arrGrowRapidPool[i]->FetchObj();
+                    return m_arrGrowRapidPool[i]->FetchObj(std::forward<Args>(args)...);
                 }
             }
             else if ( !m_arrGrowRapidPool[i]->Empty() ) {
-                return m_arrGrowRapidPool[i]->FetchObj();
+                return m_arrGrowRapidPool[i]->FetchObj(std::forward<Args>(args)...);
             }
         }
 
