@@ -19,7 +19,7 @@ private:
 };
 
 int main( int argc, char* argv[] ) {
-    CDynamicRapidPool<CPlayer, 1000, 10> oPool;
+    CDynamicRapidPool<CPlayer, 1000, 1000> oPool;
     CPlayer* poPlayer = oPool.FetchObj("name");
     oPool.ReleaseObj(poPlayer);
     return 0;
