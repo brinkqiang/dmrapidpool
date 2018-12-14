@@ -1,6 +1,7 @@
 
 #include "dmrapidpool.h"
 #include <string>
+#include <iostream>
 
 class CPlayer
 {
@@ -22,5 +23,8 @@ int main( int argc, char* argv[] ) {
     CDynamicRapidPool<CPlayer, 1000, 1000> oPool;
     CPlayer* poPlayer = oPool.FetchObj("name");
     oPool.ReleaseObj(poPlayer);
+
+    std::cout << CDMRapidManager::Instance()->Print();
+
     return 0;
 }

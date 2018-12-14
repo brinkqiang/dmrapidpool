@@ -33,6 +33,7 @@
 #include <set>
 #include <string>
 #include <map>
+#include <sstream>
 
 #include "dmsingleton.h"
 #include "dmlist.h"
@@ -100,6 +101,23 @@ public:
         {
             m_mapDMRapidInfo.erase(mapIt);
         }
+    }
+
+    std::string Print()
+    {
+        std::stringstream ss;
+        ss << "ObjName, " << "ObjSize, " << "MallocCount, " << "FreeCount" << std::endl;
+
+        for (MapDMRapidInfoIt It = m_mapDMRapidInfo.begin(); It != m_mapDMRapidInfo.end(); ++It)
+        {
+            SetDMRapidInfo& set = It->second;
+            for (SetDMRapidInfoIt It2 = set.begin(); It2 != set.end(); ++It2)
+            {
+                ss << (*It2)->GetObjName() << ", " << (*It2)->GetObjSize() << ", " << (*It2)->GetMallocCount() << ", " << (*It2)->GetFreeCount() << std::endl;
+            }
+        }
+
+        return ss.str();
     }
 private:
     MapDMRapidInfo m_mapDMRapidInfo;
