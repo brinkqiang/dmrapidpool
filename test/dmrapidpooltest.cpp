@@ -1,12 +1,25 @@
 
 #include "dmrapidpool.h"
 
-int main( int argc, char* argv[] ) {
-
-    dmrapidpool_interface* module = dmrapidpoolGetModule();
-    if (module)
+class CPlayer
+{
+public:
+    CPlayer(const std::string& name)
+        : m_strName(name)
     {
-        module->Release();
+
     }
+    const std::string& GetName();
+    {
+        return m_strName();
+    }
+private:
+    std::string m_strName;
+};
+
+int main( int argc, char* argv[] ) {
+    CDynamicRapidPool<CPlayer, 1000, 10> oPool;
+    CPlayer* poPlayer = oPool.FetchObj("name");
+    oPool.ReleaseObj(poPlayer);
     return 0;
 }
