@@ -42,7 +42,6 @@ class IDMRapidInfo
 public:
     virtual ~IDMRapidInfo() {}
     virtual uint64_t GetFreeCount(void) = 0;
-    virtual uint64_t GetAllCount(void) = 0;
     virtual uint64_t GetMallocCount(void) = 0;
     virtual const char* GetObjName(void) = 0;
     virtual uint64_t GetObjSize(void) = 0;
@@ -121,24 +120,41 @@ class CDMRapidPool {
     static const int SIZE = S;
 
     CDMRapidPool( uint16_t wIndex = 0 )
-        : m_wIndex( wIndex ), m_wFirstFlag( 0 ), m_nFreeCount( 0 ) {
+        : m_wIndex( wIndex ), m_wFirstFlag( 0 ), m_qwFreeCount( 0 ) {
         for ( int i = 0; i < SIZE; ++i ) {
             m_stRapidData[i].dwUse = 0;
             m_stRapidData[i].dwIndex = m_wIndex;
             m_stRapidData[i].dwFlag = i + 1;
         }
 
-        m_nFreeCount = SIZE;
+        m_qwFreeCount = SIZE;
     }
 
     ~CDMRapidPool() {
         assert( IsFull() );
     }
+public:
+    virtual uint64_t GetFreeCount(void)
+    {
+        return m_qwFreeCount;
+    }
 
+    virtual uint64_t GetMallocCount(void)
+    {
+        return SIZE;
+    }
+    virtual const char* GetObjName(void)
+    {
+        return typeid(OBJTYPE).name();
+    }
+    virtual uint64_t GetObjSize(void)
+    {
+        return sizeof(OBJTYPE);
+    }
 public:
     template<typename... Args>
     inline OBJTYPE*  FetchObj(Args&&... args) {
-        if ( m_nFreeCount <= 0 ) {
+        if ( Empty() ) {
             return NULL;
         }
 
@@ -152,9 +168,9 @@ public:
 
         assert( p->dwIndex == m_wIndex );
         m_wFirstFlag = p->dwFlag;
-        --m_nFreeCount;
+        --m_qwFreeCount;
         p->dwUse = 1;
-        assert( m_nFreeCount >= 0 && m_nFreeCount <= SIZE );
+        assert( m_qwFreeCount >= 0 && m_qwFreeCount <= SIZE );
         return new ( p->szData ) T(std::forward<Args>(args)...);
     }
 
@@ -171,18 +187,18 @@ public:
                 ( ( ( char* )p - ( char* )&m_stRapidData[0] ) % sizeof( SRapidData ) == 0 ) );
         p->dwFlag = m_wFirstFlag;
         m_wFirstFlag = p - m_stRapidData;
-        ++m_nFreeCount;
+        ++m_qwFreeCount;
         p->dwUse = 0;
-        assert( m_nFreeCount >= 0 && m_nFreeCount <= SIZE );
+        assert( m_qwFreeCount >= 0 && m_qwFreeCount <= SIZE );
         tObj->~T();
     }
 
     inline bool Empty() {
-        return 0 == m_nFreeCount;
+        return 0 == m_qwFreeCount;
     }
 
     inline bool IsFull() {
-        return SIZE == m_nFreeCount;
+        return SIZE == m_qwFreeCount;
     }
 
     static inline SRapidData* GetRapidData( OBJTYPE* tObj ) {
@@ -192,7 +208,7 @@ public:
   private:
     uint16_t m_wIndex;
     uint16_t m_wFirstFlag;
-    int m_nFreeCount;
+    uint64_t m_qwFreeCount;
     SRapidData m_stRapidData[SIZE];
 };
 
@@ -228,15 +244,27 @@ class CDynamicRapidPool
 public:
     virtual uint64_t GetFreeCount(void)
     {
-        return 0;
-    }
-    virtual uint64_t GetAllCount(void)
-    {
-        return 0;
+        uint64_t qwFreeCount = m_oDefaultRapidPool.GetFreeCount();
+
+        for (int i = 0; i < INDEX; ++i) {
+            if (NULL == m_arrGrowRapidPool[i]) {
+                break;
+            }
+            qwFreeCount += m_arrGrowRapidPool[i]->GetFreeCount();
+        }
+        return qwFreeCount;
     }
     virtual uint64_t GetMallocCount(void)
     {
-        return 0;
+        uint64_t qwMallocCount = m_oDefaultRapidPool.GetMallocCount();
+
+        for (int i = 0; i < INDEX; ++i) {
+            if (NULL == m_arrGrowRapidPool[i]) {
+                break;
+            }
+            qwMallocCount += m_arrGrowRapidPool[i]->GetMallocCount();
+        }
+        return qwMallocCount;
     }
     virtual const char* GetObjName(void)
     {
