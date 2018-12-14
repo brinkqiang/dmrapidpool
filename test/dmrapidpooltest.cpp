@@ -1,5 +1,6 @@
 
 #include "dmrapidpool.h"
+#include <string>
 
 class CPlayer
 {
@@ -9,9 +10,9 @@ public:
     {
 
     }
-    const std::string& GetName();
+    const std::string& GetName()
     {
-        return m_strName();
+        return m_strName;
     }
 private:
     std::string m_strName;
