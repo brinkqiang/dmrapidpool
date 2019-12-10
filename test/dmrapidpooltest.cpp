@@ -24,7 +24,7 @@ int main( int argc, char* argv[] ) {
     CPlayer* poPlayer = oPool.FetchObj("name");
     oPool.ReleaseObj(poPlayer);
 
-    std::cout << CDMRapidManager::Instance()->Print();
+    std::cout << CDMRapidFactory::Instance()->Print();
 
     return 0;
 }

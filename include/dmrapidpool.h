@@ -48,10 +48,10 @@ public:
     virtual uint64_t GetObjSize(void) = 0;
 };
 
-class CDMRapidManager : 
-    public CDMSafeSingleton<CDMRapidManager>
+class CDMRapidFactory : 
+    public CDMSafeSingleton<CDMRapidFactory>
 {
-    friend class CDMSafeSingleton<CDMRapidManager>;
+    friend class CDMSafeSingleton<CDMRapidFactory>;
 
     typedef std::set<IDMRapidInfo*>   SetDMRapidInfo;
     typedef SetDMRapidInfo::iterator  SetDMRapidInfoIt;
@@ -106,7 +106,7 @@ public:
     std::string Print()
     {
         std::stringstream ss;
-        ss << "ObjName, " << "ObjSize, " << "MallocCount, " << "FreeCount" << std::endl;
+        ss << "ObjName, " << "ObjSize, " << "MallocCount, " << "FreeCount, " << "FreeCount" << std::endl;
 
         for (MapDMRapidInfoIt It = m_mapDMRapidInfo.begin(); It != m_mapDMRapidInfo.end(); ++It)
         {
@@ -117,7 +117,7 @@ public:
             }
         }
 
-        return ss.str();
+        return std::move(ss.str());
     }
 private:
     MapDMRapidInfo m_mapDMRapidInfo;
@@ -248,7 +248,7 @@ class CDynamicRapidPool
         : m_oDefaultRapidPool( 0 ) {
         memset( m_arrGrowRapidPool, 0, sizeof( m_arrGrowRapidPool ) );
 
-        CDMRapidManager::Instance()->RegPool(this);
+        CDMRapidFactory::Instance()->RegPool(this);
     }
 
     ~CDynamicRapidPool() {
@@ -256,7 +256,7 @@ class CDynamicRapidPool
             delete m_arrGrowRapidPool[i];
         }
 
-        CDMRapidManager::Instance()->UnRegPool(this);
+        CDMRapidFactory::Instance()->UnRegPool(this);
     }
 public:
     virtual uint64_t GetFreeCount(void)
