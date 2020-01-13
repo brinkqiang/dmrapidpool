@@ -36,7 +36,6 @@
 #include <sstream>
 
 #include "dmsingleton.h"
-#include "dmlist.h"
 
 class IDMRapidInfo
 {
