@@ -162,10 +162,12 @@ public:
     {
         return SIZE;
     }
+
     virtual const char* GetObjName(void)
     {
         return typeid(OBJTYPE).name();
     }
+    
     virtual uint64_t GetObjSize(void)
     {
         return sizeof(OBJTYPE);
