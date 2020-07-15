@@ -21,8 +21,11 @@ private:
 
 int main( int argc, char* argv[] ) {
     CDynamicRapidPool<CPlayer, 1000, 1000> oPool;
-    CPlayer* poPlayer = oPool.FetchObj("name");
-    oPool.ReleaseObj(poPlayer);
+
+    for ( int i = 0; i < 10000; ++i)
+    {
+        CPlayer* poPlayer = oPool.FetchObj("name");       
+    }
 
     std::cout << CDMRapidFactory::Instance()->Print();
 
