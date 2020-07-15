@@ -107,14 +107,14 @@ public:
     std::string Print()
     {
         std::stringstream ss;
-        ss << "ObjName, " << "ObjSize, " << "MallocCount, " << "FreeCount" << std::endl;
+        ss << "ObjName, " << "ObjSize, " << "MallocCount, " << "FreeCount, " << "TotalSize" << std::endl;
 
         for (MapDMRapidInfoIt It = m_mapDMRapidInfo.begin(); It != m_mapDMRapidInfo.end(); ++It)
         {
             SetDMRapidInfo& set = It->second;
             for (SetDMRapidInfoIt It2 = set.begin(); It2 != set.end(); ++It2)
             {
-                ss << (*It2)->GetObjName() << ", " << (*It2)->GetObjSize() << ", " << (*It2)->GetMallocCount() << ", " << (*It2)->GetFreeCount() << std::endl;
+                ss << (*It2)->GetObjName() << ", " << (*It2)->GetObjSize() << ", " << (*It2)->GetMallocCount() << ", " << (*It2)->GetFreeCount() << ", " << (*It2)->GetObjSize() * (*It2)->GetMallocCount() / (1024.0 * 1024) << "M" << std::endl;
             }
         }
 
