@@ -107,7 +107,7 @@ public:
     std::string Print()
     {
         std::stringstream ss;
-        ss << "ObjName, " << "ObjSize, " << "MallocCount, " << "FreeCount, " << "FreeCount" << std::endl;
+        ss << "ObjName, " << "ObjSize, " << "MallocCount, " << "FreeCount" << std::endl;
 
         for (MapDMRapidInfoIt It = m_mapDMRapidInfo.begin(); It != m_mapDMRapidInfo.end(); ++It)
         {
