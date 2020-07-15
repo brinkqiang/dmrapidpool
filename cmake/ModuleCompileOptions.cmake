@@ -1,11 +1,22 @@
 
+macro(ShowEnvironment)
+  message(STATUS "================================================================================")
+  get_cmake_property(_variableNames VARIABLES)
+  foreach (_variableName ${_variableNames})
+      message(STATUS "${_variableName}=${${_variableName}}")
+  endforeach()
+
+  execute_process(COMMAND "${CMAKE_COMMAND}" "-E" "environment")
+  message(STATUS "================================================================================")
+endmacro(ShowEnvironment)
+
 macro(ModuleSetCompileOptions)
   CMAKE_POLICY(SET CMP0022 NEW)
   INCLUDE(CheckCXXCompilerFlag)
   IF(POLICY CMP0048)
     CMAKE_POLICY(SET CMP0048 NEW)
   ENDIF()
-
+  
   SET (CMAKE_C_STANDARD 99)
   
   IF ("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -100,7 +111,7 @@ macro(ModuleSetCompileOptions)
     SET(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} -g")
     SET(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -g")
 
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -fPIC" )
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC" )
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -D_DEBUG")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
     SET(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -g")
@@ -146,7 +157,7 @@ macro(ModuleSetCompileOptions)
     SET(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} -g")
     SET(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -g")
 
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -fPIC" )
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC" )
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -D_DEBUG")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
     SET(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -g")
@@ -164,3 +175,20 @@ macro(ModuleSetCompileOptions)
     ENDIF(CCACHE_FOUND)
   ENDIF ()
 endmacro(ModuleSetCompileOptions)
+
+macro(ModuleSetWinCompilerFlags)
+  IF (WIN32)
+    set(CompilerFlags
+            CMAKE_CXX_FLAGS
+            CMAKE_CXX_FLAGS_DEBUG
+            CMAKE_CXX_FLAGS_RELEASE
+            CMAKE_C_FLAGS
+            CMAKE_C_FLAGS_DEBUG
+            CMAKE_C_FLAGS_RELEASE
+            )
+    foreach(CompilerFlag ${CompilerFlags})
+      string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+    endforeach()
+  ENDIF (WIN32)
+endmacro(ModuleSetWinCompilerFlags)
+
