@@ -49,17 +49,18 @@ public:
     virtual uint64_t GetObjSize(void) = 0;
 };
 
-class CDMRapidFactory : 
-    public CDMSafeSingleton<CDMRapidFactory>
+class CDMRapidFactory
 {
-    friend class CDMSafeSingleton<CDMRapidFactory>;
-
     typedef std::set<IDMRapidInfo*>   SetDMRapidInfo;
     typedef SetDMRapidInfo::iterator  SetDMRapidInfoIt;
 
     typedef std::map<std::string, SetDMRapidInfo> MapDMRapidInfo;
     typedef MapDMRapidInfo::iterator              MapDMRapidInfoIt;
 public:
+	static CDMRapidFactory* Instance() {
+		static CDMRapidFactory s_oT;
+		return &s_oT;
+	}
 
     void RegPool(IDMRapidInfo* poInfo)
     {
