@@ -37,8 +37,6 @@
 #include <map>
 #include <sstream>
 
-#include "dmsingleton.h"
-
 class IDMRapidInfo
 {
 public:
