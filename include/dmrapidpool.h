@@ -55,10 +55,10 @@ class CDMRapidFactory
     typedef std::map<std::string, SetDMRapidInfo> MapDMRapidInfo;
     typedef MapDMRapidInfo::iterator              MapDMRapidInfoIt;
 public:
-	static CDMRapidFactory* Instance() {
-		static CDMRapidFactory s_oT;
-		return &s_oT;
-	}
+    static CDMRapidFactory* Instance() {
+        static CDMRapidFactory s_oT;
+        return &s_oT;
+    }
 
     void RegPool(IDMRapidInfo* poInfo)
     {
@@ -95,7 +95,7 @@ public:
             assert(0);
             return;
         }
- 
+
         set.erase(setIt);
         if (set.empty())
         {
@@ -125,21 +125,21 @@ private:
 
 template<class T, int S>
 class CDMRapidPool {
-  public:
+public:
     typedef T OBJTYPE;
 
     typedef struct tagRapidData {
-        uint32_t dwUse: 1;
-        uint32_t dwIndex: 15;
-        uint32_t dwFlag: 16;
-        char szData[sizeof( OBJTYPE )];
+        uint32_t dwUse : 1;
+        uint32_t dwIndex : 15;
+        uint32_t dwFlag : 16;
+        char szData[sizeof(OBJTYPE)];
     } SRapidData;
 
     static const int SIZE = S;
 
-    CDMRapidPool( uint16_t wIndex = 0 )
-        : m_wIndex( wIndex ), m_wFirstFlag( 0 ), m_qwFreeCount( 0 ) {
-        for ( int i = 0; i < SIZE; ++i ) {
+    CDMRapidPool(uint16_t wIndex = 0)
+        : m_wIndex(wIndex), m_wFirstFlag(0), m_qwFreeCount(0) {
+        for (int i = 0; i < SIZE; ++i) {
             m_stRapidData[i].dwUse = 0;
             m_stRapidData[i].dwIndex = m_wIndex;
             m_stRapidData[i].dwFlag = i + 1;
@@ -149,7 +149,7 @@ class CDMRapidPool {
     }
 
     ~CDMRapidPool() {
-        assert( IsFull() );
+        assert(IsFull());
     }
 public:
     virtual uint64_t GetFreeCount(void)
@@ -166,50 +166,50 @@ public:
     {
         return typeid(OBJTYPE).name();
     }
-    
+
     virtual uint64_t GetObjSize(void)
     {
         return sizeof(OBJTYPE);
     }
 public:
     template<typename... Args>
-    inline OBJTYPE*  FetchObj(Args&&... args) {
-        if ( Empty() ) {
+    inline OBJTYPE* FetchObj(Args&&... args) {
+        if (Empty()) {
             return NULL;
         }
 
-        assert( m_wFirstFlag < SIZE );
+        assert(m_wFirstFlag < SIZE);
         SRapidData* p = &m_stRapidData[m_wFirstFlag];
 
-        if ( p->dwUse ) {
+        if (p->dwUse) {
             abort();
             return NULL;
         }
 
-        assert( p->dwIndex == m_wIndex );
+        assert(p->dwIndex == m_wIndex);
         m_wFirstFlag = p->dwFlag;
         --m_qwFreeCount;
         p->dwUse = 1;
-        assert( m_qwFreeCount >= 0 && m_qwFreeCount <= SIZE );
-        return new ( p->szData ) T(std::forward<Args>(args)...);
+        assert(m_qwFreeCount >= 0 && m_qwFreeCount <= SIZE);
+        return new (p->szData) T(std::forward<Args>(args)...);
     }
 
-    inline void ReleaseObj( OBJTYPE* tObj ) {
-        SRapidData* p = GetRapidData( tObj );
+    inline void ReleaseObj(OBJTYPE* tObj) {
+        SRapidData* p = GetRapidData(tObj);
 
-        if ( !p->dwUse ) {
+        if (!p->dwUse) {
             abort();
             return;
         }
 
-        assert( p->dwIndex == m_wIndex );
-        assert( p >= &m_stRapidData[0] && p <= &m_stRapidData[SIZE - 1] &&
-                ( ( ( char* )p - ( char* )&m_stRapidData[0] ) % sizeof( SRapidData ) == 0 ) );
+        assert(p->dwIndex == m_wIndex);
+        assert(p >= &m_stRapidData[0] && p <= &m_stRapidData[SIZE - 1] &&
+            (((char*)p - (char*)&m_stRapidData[0]) % sizeof(SRapidData) == 0));
         p->dwFlag = m_wFirstFlag;
         m_wFirstFlag = p - m_stRapidData;
         ++m_qwFreeCount;
         p->dwUse = 0;
-        assert( m_qwFreeCount >= 0 && m_qwFreeCount <= SIZE );
+        assert(m_qwFreeCount >= 0 && m_qwFreeCount <= SIZE);
         tObj->~T();
     }
 
@@ -221,11 +221,11 @@ public:
         return SIZE == m_qwFreeCount;
     }
 
-    static inline SRapidData* GetRapidData( OBJTYPE* tObj ) {
-        return ( SRapidData* )( ( char* )tObj - offsetof( SRapidData, szData ) );
+    static inline SRapidData* GetRapidData(OBJTYPE* tObj) {
+        return (SRapidData*)((char*)tObj - offsetof(SRapidData, szData));
     }
 
-  private:
+private:
     uint16_t m_wIndex;
     uint16_t m_wFirstFlag;
     uint64_t m_qwFreeCount;
@@ -237,25 +237,25 @@ template<class T, int S = 1000, int I = 1000>
 class CDynamicRapidPool
     : public IDMRapidInfo
 {
-  public:
+public:
     typedef CDynamicRapidPool<T, S, I>  CThisPool;
     typedef CDMRapidPool<T, S>            CBaseRapidPool;
     typedef typename CBaseRapidPool::OBJTYPE     OBJTYPE;
     typedef typename CBaseRapidPool::SRapidData SRapidData;
     static const int SIZE = S;
     static const int INDEX = I;
-    
+
     static_assert(SIZE < 65535 && INDEX < 32767, "SIZE Must < 65535, INDEX Must < 32767!");
 
     CDynamicRapidPool()
-        : m_oDefaultRapidPool( 0 ) {
-        memset( m_arrGrowRapidPool, 0, sizeof( m_arrGrowRapidPool ) );
+        : m_oDefaultRapidPool(0) {
+        memset(m_arrGrowRapidPool, 0, sizeof(m_arrGrowRapidPool));
 
         CDMRapidFactory::Instance()->RegPool(this);
     }
 
     ~CDynamicRapidPool() {
-        for ( int i = 0; i < INDEX; ++i ) {
+        for (int i = 0; i < INDEX; ++i) {
             delete m_arrGrowRapidPool[i];
         }
 
@@ -296,48 +296,67 @@ public:
     }
 public:
     template<typename... Args>
-    inline OBJTYPE*  FetchObj(Args&&... args) {
-        if ( !m_oDefaultRapidPool.Empty() ) {
+    inline OBJTYPE* FetchObj(Args&&... args) {
+        if (!m_oDefaultRapidPool.Empty()) {
             return m_oDefaultRapidPool.FetchObj(std::forward<Args>(args)...);
         }
 
-        for ( int i = 0; i < INDEX; ++i ) {
-            if ( NULL == m_arrGrowRapidPool[i] ) {
-                m_arrGrowRapidPool[i] = new CBaseRapidPool( i + 1 );
+        for (int i = 0; i < INDEX; ++i) {
+            if (NULL == m_arrGrowRapidPool[i]) {
+                m_arrGrowRapidPool[i] = new CBaseRapidPool(i + 1);
 
-                if ( !m_arrGrowRapidPool[i]->Empty() ) {
+                if (!m_arrGrowRapidPool[i]->Empty()) {
                     return m_arrGrowRapidPool[i]->FetchObj(std::forward<Args>(args)...);
                 }
             }
-            else if ( !m_arrGrowRapidPool[i]->Empty() ) {
+            else if (!m_arrGrowRapidPool[i]->Empty()) {
                 return m_arrGrowRapidPool[i]->FetchObj(std::forward<Args>(args)...);
             }
         }
 
-        assert( 0 );
+        assert(0);
         return NULL;
     }
 
-    inline void ReleaseObj( OBJTYPE* obj ) {
-        if ( NULL == obj ) {
+    inline void ReleaseObj(OBJTYPE* obj) {
+        if (NULL == obj) {
             return;
         }
 
-        SRapidData* p = CBaseRapidPool::GetRapidData( obj );
+        SRapidData* p = CBaseRapidPool::GetRapidData(obj);
 
-        if ( 0 == p->dwIndex ) {
-            m_oDefaultRapidPool.ReleaseObj( obj );
+        if (0 == p->dwIndex) {
+            m_oDefaultRapidPool.ReleaseObj(obj);
             return;
         }
 
-        assert( p->dwIndex < INDEX + 1 );
-        assert( m_arrGrowRapidPool[p->dwIndex - 1] );
-        m_arrGrowRapidPool[p->dwIndex - 1]->ReleaseObj( obj );
+        assert(p->dwIndex < INDEX + 1);
+        assert(m_arrGrowRapidPool[p->dwIndex - 1]);
+        m_arrGrowRapidPool[p->dwIndex - 1]->ReleaseObj(obj);
     }
 private:
 
     CBaseRapidPool  m_oDefaultRapidPool;
     CBaseRapidPool* m_arrGrowRapidPool[INDEX];
 };
+
+template<typename T, int S = 1000, int I = 1000>
+auto& Pool()
+{
+    thread_local CDynamicRapidPool<T, S, I> oPool;
+    return oPool;
+}
+
+template<typename T, typename... Args>
+T* New(Args&& ... args)
+{
+    return Pool<T>().FetchObj(std::forward<Args>(args)...);
+}
+
+template<typename T>
+void Delete(T* data)
+{
+    Pool<T>().ReleaseObj(data);
+}
 
 #endif // __DMRAPIDPOOL_H_INCLUDE__
