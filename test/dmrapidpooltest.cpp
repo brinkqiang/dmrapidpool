@@ -35,17 +35,18 @@ private:
     std::string m_strName;
 };
 
-int main( int argc, char* argv[] ) {
-    CDynamicRapidPool<CPlayer, 1000, 1000> oPool;
-    CDynamicRapidPool<CMonster, 1000, 1000> oPool2;
+int main(int argc, char* argv[]) {
 
-    for ( int i = 0; i < 10000; ++i)
+    for (int i = 0; i < 10000; ++i)
     {
-        CPlayer* poPlayer = oPool.FetchObj("name");       
+        CPlayer* poPlayer = New<CPlayer>("name");
+
+        Delete(poPlayer);
     }
-    for ( int i = 0; i < 10000; ++i)
+    for (int i = 0; i < 10000; ++i)
     {
-        CMonster* poMonster = oPool2.FetchObj("name");       
+        CMonster* poMonster = New<CMonster>("name");
+        Delete(poMonster);
     }
 
     std::cout << CDMRapidFactory::Instance()->Print();
