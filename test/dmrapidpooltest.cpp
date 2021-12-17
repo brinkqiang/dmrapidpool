@@ -39,14 +39,14 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < 10000; ++i)
     {
-        CPlayer* poPlayer = New<CPlayer>("name");
+        CPlayer* poPlayer = DMNew<CPlayer>("name");
 
-        Delete(poPlayer);
+        DMDelete(poPlayer);
     }
     for (int i = 0; i < 10000; ++i)
     {
-        CMonster* poMonster = New<CMonster>("name");
-        Delete(poMonster);
+        CMonster* poMonster = DMNew<CMonster>("name");
+        DMDelete(poMonster);
     }
 
     std::cout << CDMRapidFactory::Instance()->Print();

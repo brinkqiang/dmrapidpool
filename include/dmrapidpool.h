@@ -341,22 +341,22 @@ private:
 };
 
 template<typename T, int S = 10000, int I = 1000>
-auto& Pool()
+auto& DMPool()
 {
     thread_local CDynamicRapidPool<T, S, I> oPool;
     return oPool;
 }
 
 template<typename T, typename... Args>
-T* New(Args&& ... args)
+T* DMNew(Args&& ... args)
 {
-    return Pool<T>().FetchObj(std::forward<Args>(args)...);
+    return DMPool<T>().FetchObj(std::forward<Args>(args)...);
 }
 
 template<typename T>
-void Delete(T* data)
+void DMDelete(T* data)
 {
-    Pool<T>().ReleaseObj(data);
+    DMPool<T>().ReleaseObj(data);
 }
 
 #endif // __DMRAPIDPOOL_H_INCLUDE__
