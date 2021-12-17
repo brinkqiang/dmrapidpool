@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
         DMDelete(poMonster);
     }
 
-    std::cout << CDMRapidFactory::Instance()->Print();
+    std::cout << DMPrintPool();
 
     return 0;
 }
