@@ -340,7 +340,7 @@ private:
     CBaseRapidPool* m_arrGrowRapidPool[INDEX];
 };
 
-template<typename T, int S = 1000, int I = 1000>
+template<typename T, int S = 10000, int I = 1000>
 auto& Pool()
 {
     thread_local CDynamicRapidPool<T, S, I> oPool;
