@@ -341,22 +341,27 @@ private:
 };
 
 template<typename T, int S = 10000, int I = 1000>
-auto& DMPool()
+inline auto& DMPool()
 {
     thread_local CDynamicRapidPool<T, S, I> oPool;
     return oPool;
 }
 
 template<typename T, typename... Args>
-T* DMNew(Args&& ... args)
+inline T* DMNew(Args&& ... args)
 {
     return DMPool<T>().FetchObj(std::forward<Args>(args)...);
 }
 
 template<typename T>
-void DMDelete(T* data)
+inline void DMDelete(T* data)
 {
     DMPool<T>().ReleaseObj(data);
+}
+
+inline void DMPrintPool()
+{
+    CDMRapidFactory::Instance()->Print();
 }
 
 #endif // __DMRAPIDPOOL_H_INCLUDE__
