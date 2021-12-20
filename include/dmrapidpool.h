@@ -359,7 +359,7 @@ inline void DMDelete(T* data)
     DMPool<T>().ReleaseObj(data);
 }
 
-inline std::string DMPrintPool()
+inline std::string DMGetPoolInfo()
 {
     return std::move(CDMRapidFactory::Instance()->Print());
 }

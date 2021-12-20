@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
         DMDelete(poMonster);
     }
 
-    std::cout << DMPrintPool();
+    std::cout << DMGetPoolInfo();
 
     return 0;
 }
