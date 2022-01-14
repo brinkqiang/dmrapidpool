@@ -43,6 +43,7 @@ int main(int argc, char* argv[]) {
 
         DMDelete(poPlayer);
     }
+
     for (int i = 0; i < 10000; ++i)
     {
         CMonster* poMonster = DMNew<CMonster>("name");
