@@ -36,6 +36,7 @@
 #include <string>
 #include <map>
 #include <sstream>
+#include <mutex>
 
 class IDMRapidInfo
 {
@@ -62,6 +63,8 @@ public:
 
     void RegPool(IDMRapidInfo* poInfo)
     {
+        std::lock_guard guard(m_lock);
+
         MapDMRapidInfoIt mapIt = m_mapDMRapidInfo.find(poInfo->GetObjName());
         if (mapIt != m_mapDMRapidInfo.end())
         {
@@ -80,6 +83,8 @@ public:
 
     void UnRegPool(IDMRapidInfo* poInfo)
     {
+        std::lock_guard guard(m_lock);
+
         MapDMRapidInfoIt mapIt = m_mapDMRapidInfo.find(poInfo->GetObjName());
         if (mapIt == m_mapDMRapidInfo.end())
         {
@@ -105,6 +110,8 @@ public:
 
     std::string Print()
     {
+        std::lock_guard guard(m_lock);
+
         std::stringstream ss;
         ss << "ObjName, " << "ObjSize, " << "MallocCount, " << "FreeCount, " << "TotalSize" << std::endl;
 
@@ -121,6 +128,7 @@ public:
     }
 private:
     MapDMRapidInfo m_mapDMRapidInfo;
+    std::mutex m_lock;
 };
 
 template<class T, int S>
