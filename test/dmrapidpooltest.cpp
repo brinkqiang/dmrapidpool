@@ -40,16 +40,15 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < 10000; ++i)
     {
-        CPlayer* poPlayer = DMNew<CPlayer>("name");
 
-        DMDelete(poPlayer);
+        std::unique_ptr<CPlayer, DMPoolDeleter<CPlayer>> player;
+        player.reset(DMNew<CPlayer>("name"));
     }
 
     for (int i = 0; i < 10000; ++i)
     {
-        CMonster* poMonster = DMNew<CMonster>("name");
-
-        DMDelete(poMonster);
+        std::unique_ptr<CPlayer, DMPoolDeleter<CPlayer>> player;
+        player.reset(DMNew<CPlayer>("name"));
     }
 
     dmthreadpool pool;
@@ -59,9 +58,8 @@ int main(int argc, char* argv[]) {
 
             for (int j = 0; j < 100000; ++j)
             {
-                CPlayer* poPlayer = DMNew<CPlayer>("name");
-
-                DMDelete(poPlayer);
+                std::unique_ptr<CPlayer, DMPoolDeleter<CPlayer>> player;
+                player.reset(DMNew<CPlayer>("name"));
             }
         });
     }
