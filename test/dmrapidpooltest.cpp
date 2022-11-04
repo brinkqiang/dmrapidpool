@@ -40,7 +40,6 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < 10000; ++i)
     {
-
         std::unique_ptr<CPlayer, DMPoolDeleter<CPlayer>> player;
         player.reset(DMNew<CPlayer>("name"));
     }

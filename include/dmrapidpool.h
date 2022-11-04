@@ -374,4 +374,18 @@ inline std::string DMGetPoolInfo()
     return std::move(CDMRapidFactory::Instance()->Print());
 }
 
+
+template<typename T>
+struct DMPoolDeleter
+{
+
+    inline void operator()(T* f) const
+    {
+        if (f)
+        {
+            DMDelete(f);
+        }
+    }
+};
+
 #endif // __DMRAPIDPOOL_H_INCLUDE__
