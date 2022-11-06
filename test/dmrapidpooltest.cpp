@@ -12,6 +12,12 @@ public:
     {
 
     }
+    virtual ~CPlayer()
+    {
+
+    }
+
+
     const std::string& GetName()
     {
         return m_strName;
@@ -28,6 +34,12 @@ public:
     {
 
     }
+    virtual ~CMonster()
+    {
+
+    }
+
+
     const std::string& GetName()
     {
         return m_strName;
@@ -40,8 +52,7 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < 10000; ++i)
     {
-        std::unique_ptr<CPlayer, DMPoolDeleter<CPlayer>> player;
-        player.reset(DMNew<CPlayer>("name"));
+        std::unique_ptr<CPlayer, DMPoolDeleter<CPlayer>> player(DMNew<CPlayer>("name"));
     }
 
     for (int i = 0; i < 10000; ++i)
