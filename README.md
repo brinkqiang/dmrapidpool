@@ -21,6 +21,5 @@ dmrapidpool
 ```cpp
 ```
 ## Contacts
-[![Join the chat](https://badges.gitter.im/brinkqiang/dmrapidpool/Lobby.svg)](https://gitter.im/brinkqiang/dmrapidpool)
 
 ## Thanks
