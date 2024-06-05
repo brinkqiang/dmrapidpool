@@ -1,8 +1,4 @@
 
-rem - clone code
-rem git clone https://github.com/brinkqiang/dmrapidpool.git
-rem pushd dmrapidpool
-rem git submodule update --init --recursive
 
 rmdir /S /Q build
 mkdir build
